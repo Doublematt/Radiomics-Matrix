@@ -1,6 +1,6 @@
 class NGLDM:
     """
-    This class calculates NGLDM matrix based on given algorytm:
+    This class calculates NGLDM NGLDM_matrix based on given algorytm:
 
     !!! TODO: DESCRIBE THE ALGORYTM
 
@@ -11,27 +11,27 @@ class NGLDM:
         2D array of voxel's values in a given gray scale
 
     NGLDM_omatrix : numpy.array()
-        output NGLDM matrix, matrix based on NGLDM matrix algorytm
+        output NGLDM NGLDM_matrix, NGLDM_matrix based on NGLDM NGLDM_matrix algorytm
 
 
     Methods
     --------
 
     get_matrix()
-        returns a matrix given in constructor
+        returns a NGLDM_matrix given in constructor
 
     set_matrix(new_matrix)
-        sets new matrix
+        sets new NGLDM_matrix
 
     get_NGLDM_omatrix()
-        returns 2D array - output NGLDM matrix
+        returns 2D array - output NGLDM NGLDM_matrix
 
     get_Ng (position_x, position_y)
-        Function used to obtain Ng value nessesery to create NGLDM matrix
+        Function used to obtain Ng value nessesery to create NGLDM NGLDM_matrix
 
     NGLDM_matrix (grey_levels, d)
         Function used to set the NGLDM_omatrix value.
-        Returns NGLDM matrix.
+        Returns NGLDM NGLDM_matrix.
 
 
 
@@ -39,7 +39,7 @@ class NGLDM:
 
     def __init__(self, matrix):
         """
-        Constructor method setting up a matrix on which the NGLDM matrix will be prepared on.
+        Constructor method setting up a NGLDM_matrix on which the NGLDM NGLDM_matrix will be prepared on.
 
         Parameters
         ------------
@@ -62,7 +62,7 @@ class NGLDM:
 
     def set_matrix(self, new_matrix):
         """
-        Allows to change the voxel's gray scale matrix
+        Allows to change the voxel's gray scale NGLDM_matrix
 
         Parameters
         ------------
@@ -85,7 +85,7 @@ class NGLDM:
 
     def get_Ng(self, position_x, position_y, d=1):
         """
-        Returns Ng value nessesery to create NGLDM matrix.
+        Returns Ng value nessesery to create NGLDM NGLDM_matrix.
 
         Calculates Ng value for given position.
 
@@ -134,20 +134,20 @@ class NGLDM:
 
     def NGLDM_matrix(self, grey_levels, d=1):
         """
-        Function returns NGLDM matrix.
+        Function returns NGLDM NGLDM_matrix.
 
         It follows the algorithm to get Ng, Nn values and increase value at this location.
         [x, y] -> [Ng, Nn]
-        Then process repeats until no value can be calculated and the NGLDM matrix is returned
+        Then process repeats until no value can be calculated and the NGLDM NGLDM_matrix is returned
 
-        If d is different from 1,2,3 then It will return empty matrix (filled with 0)
+        If d is different from 1,2,3 then It will return empty NGLDM_matrix (filled with 0)
         If d is not defined then it's value is set to 1
 
         Parameters
         -----------
 
         grey_levels : int
-            number of possible gray levels and number of rows in NGLDM matrix
+            number of possible gray levels and number of rows in NGLDM NGLDM_matrix
 
         d : int in {1, 2, 3}
             range in which algorytm looks for same values 1 -> 3x3, 2 -> 5x5, 3 -> 7x7
@@ -161,15 +161,15 @@ class NGLDM:
         # range for loops
         matrix_range = np.shape(self.matrix)
 
-        # preparing NGLDM matrix filled with zeros
+        # preparing NGLDM NGLDM_matrix filled with zeros
         output_matrix = np.zeros([grey_levels, 9])
 
         # checking if d values is right
-        # if it is, returns blank matrix filed with zeros
+        # if it is, returns blank NGLDM_matrix filed with zeros
         if d not in d_range:
             return output_matrix
 
-        # looping for every value in 3D matrix
+        # looping for every value in 3D NGLDM_matrix
         for i in range(d, matrix_range[0] - d):
             for j in range(d, matrix_range[1] - d):
                 # getting Ng value
@@ -177,7 +177,7 @@ class NGLDM:
                 # getting Nn value
                 Nn = self.matrix[i, j]
 
-                # changing specific value in NGLDM matrix
+                # changing specific value in NGLDM NGLDM_matrix
                 output_matrix[Nn, Ng] += 1
 
         #deleting 0's'
@@ -186,7 +186,7 @@ class NGLDM:
         # setting the attribute value
         self.NGLDM_omatrix = output_matrix
 
-        # NGLDM matrix
+        # NGLDM NGLDM_matrix
         return output_matrix.astype(dtype='int32')
 
 def modifyMatrix(matrix):
