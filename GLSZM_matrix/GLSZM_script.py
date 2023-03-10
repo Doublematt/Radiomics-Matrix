@@ -20,7 +20,7 @@ with open("sample.txt", "w") as file:
 
 import os
 
-path_of_the_directory = '..\LungNodules'
+path_of_the_directory = 'Path to dir'
 print("Files and directories in a specified path:")
 for filename in os.listdir(path_of_the_directory):
     current_file = os.path.join(path_of_the_directory, filename)
@@ -55,7 +55,7 @@ for filename in os.listdir(path_of_the_directory):
 
         glszm_matrix = delete_unused_columns(glszm_matrix)
 
-        with open("sample.txt", "a") as file:
+        with open("file to save", "a") as file:
             file.write("\n" + filename + "\t")
             file.write(str(features.small_zone_emphasis(glszm_matrix)) + "\t")
             file.write(str(features.large_zone_emphasis(glszm_matrix)) + "\t")
