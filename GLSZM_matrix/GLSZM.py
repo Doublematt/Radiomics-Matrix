@@ -16,10 +16,10 @@ def find_positions(my_matrix, x_position, y_position):
     Parameters:
     -------------
 
-    :param my_matrix:
-    :param x_position:
-    :param y_position:
-    :return:
+    :param my_matrix: voxel's matrix
+    :param x_position: voxel's x-xis position
+    :param y_position: voxel's y-axis position
+    :return: counter - number of voxels, excluded - voxel's that was already searched
     """
 
     # init essential values
@@ -91,11 +91,34 @@ def find_positions(my_matrix, x_position, y_position):
     return counter, new_excluded
 
 
-def recurrence_search(my_array, counter, excluded, x_position, y_position):
+def recurrence_search(my_matrix, counter, excluded, x_position, y_position):
+    """
+
+    Function used for recurrence searched for voxels with the same value as given.
+
+    Parameters:
+    ------------------
+
+    :param my_matrix: voxel's matrix
+    :param counter: number of voxels found with the same value
+    :param excluded: voxel's with the same value, that was already searched
+    :param x_position: voxel's x-axis position
+    :param y_position: voxel's y-axis position
+    :return: number of voxels witch the same value, voxels already searched
+    """
+
+    # init initial parameters
+
+    # copy counter value
     given_counter = counter
-    value = my_array[x_position, y_position]
+    # get the value of given voxel
+    value = my_matrix[x_position, y_position]
+    # update excluded
     excluded = np.vstack([excluded, [x_position, y_position]])
-    shape = np.shape(my_array)
+
+    shape = np.shape(my_matrix)
+
+    # same as in find_positions method
 
     if 0 < x_position < (shape[0] - 1):
         rows = np.array([x_position - 1, x_position, x_position + 1])
@@ -111,8 +134,10 @@ def recurrence_search(my_array, counter, excluded, x_position, y_position):
     elif y_position == (shape[1] - 1):
         columns = np.array([y_position - 1, y_position])
 
+    # init with some value to fit
     same_value_position = np.array([0, 0])
 
+    # finding the same within voxel's range
     for i in rows:
         for j in columns:
 
@@ -122,37 +147,85 @@ def recurrence_search(my_array, counter, excluded, x_position, y_position):
             if check_array(np.array([i, j]), excluded):
                 continue
 
-            if my_array[i, j] == value:
+            if my_matrix[i, j] == value:
                 same_value_position = np.vstack([same_value_position, [i, j]])
                 counter = counter + 1
 
+    # deleting trash value
     same_value_position = np.delete(same_value_position, 0, 0)
 
+    # checking if any new value was found
     if given_counter != counter:
+        # loop and recursion
         for k in range(np.shape(same_value_position)[0]):
-            counter, excluded = recurrence_search(my_array, counter, excluded, same_value_position[k, 0],
+            counter, excluded = recurrence_search(my_matrix, counter, excluded, same_value_position[k, 0],
                                                   same_value_position[k, 1])
 
     return counter, excluded
 
 
 def check_array(looking, given):
+    """
+    Helper method used to determinate if array is a part of different 2D array for example:
+    if [2, 1] is in [[2, 2], [2, 1], [2, 0]] --> True
+                             -----
+
+     if [2, 1] is in [[2, 2], [1, 1], [2, 0]] --> False
+           ^                ^
+        looking             given
+
+    Parameters:
+    ----------------
+
+    :param looking: 1 Dimension array
+    :param given:  2 Dimnesion array
+    :return: True if looking is in the 2D array and false otherwise
+    """
+    # loop through every position in given
     for position in range(np.shape(given)[0]):
         if np.array_equal(looking, given[position]):
             return True
+
+    # if value wasn't found return false
     return False
 
 
 def delete_from_array(array, element):
+    """
+    Helper method that finds first occurrence of given element and deletes it from array.
+
+    Parameters:
+    -------------
+
+    :param array: group of elements
+    :param element: element to be deleted
+    :return: array without given element
+    """
+
+    # finding first position of given element
     index = find_index(array, element)
+    # deleting it from array
     array = np.delete(array, index, 0)
     return array
 
 
 def find_index(array, element):
+    """
+    Helper method that finds index of given element in given array
+    If element is not found returns -1
+
+    Parameters:
+    ----------------
+
+    :param array: group of elements
+    :param element: element to which index is being found
+    :return: index of element or -1
+    """
+    # linear search for element
     for i in range(np.shape(array)[0]):
         if np.array_equal(element, array[i]):
             return i
+    # occurs if element is not found
     return -1
 
 
