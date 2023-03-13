@@ -387,7 +387,7 @@ def delete_unused_columns(matrix):
     :param matrix: GLSZM matrix
     :return: GLSZM matrix without 0-filled columns
     """
-
+    new_matrix = matrix
     minimal = 0
     # looping backwards from last column to first
     for i in range(np.shape(matrix)[1] - 1, 0, -1):
