@@ -230,22 +230,49 @@ def find_index(array, element):
 
 
 def create_coordinates(shape):
-    coor_array = np.array([0, 0])
+    """
+    Helper method used to create a set of coordinates based on given matrix shape.
+    [[2, 1],
+     [3, 4]]  --> shape = (2,2) -> coordinates [[0, 0], [0, 1], [1, 0], [1, 1]]
 
+     Parameters:
+     ----------------
+
+    :param shape: shape of matrix
+    :return: numpy array of coordinates
+    """
+    # init coordinates
+    coordinates_array = np.array([0, 0])
+
+    # add every coordinate
     for i in range(shape[0]):
         for j in range(shape[1]):
-            coor_array = np.vstack([coor_array, [i, j]])
+            coordinates_array = np.vstack([coordinates_array, [i, j]])
 
-    coor_array = np.delete(coor_array, 0, 0)
+    # delete first value as it's additional
+    coordinates_array = np.delete(coordinates_array, 0, 0)
 
-    return coor_array
+    return coordinates_array
 
 
-def aftercut(matrix):
+def delete_0_column_row(matrix):
+    """
+    Method used to delete first column and first row.
+    This needs to be done, because the output matrix has to match GLSZM matrix which starts with 1 not 0
 
+    Parameters:
+    --------------
+
+    :param matrix: matrix to be cut
+    :return: matrix starting with 1
+    """
+    # get the matrix shape
     matrix_shape = np.shape(matrix)
+    # make an empty array for values from matrix
     new_matrix = np.zeros([matrix_shape[0] - 1, matrix_shape[1] - 1])
 
+    # rewrite values from given matrix to the new one
+    # starting with position 1
     for i in range(1, np.shape(matrix)[0]):
         for j in range(1, np.shape(matrix)[1]):
             new_matrix[i - 1, j - 1] = matrix[i, j]
@@ -254,39 +281,70 @@ def aftercut(matrix):
 
 
 def GLSZM_matrix(matrix, gray_level=8):
+    """
+    Main function of GLSZM.
+    The max zone size is hardcoded in this method
+    Function calculates and returns GLSZM matrix
+
+    Parameters:
+    ------------
+
+    :param matrix: gray level array
+    :param gray_level: number of gray levels
+    :return: GLSZM matrix
+    """
+    # hardcoded max zone size
+    # does not need to be so big, It depends on data given
     max_zone_size = 600
+
+    # init basic parameters
     matrix_shape = np.shape(matrix)
     output_matrix = np.zeros([gray_level, max_zone_size])
     every_coordinates = create_coordinates(matrix_shape)
-    zeros_cooridnates = find_zeros(matrix, every_coordinates)
+    zeros_coordinates = find_zeros(matrix, every_coordinates)
 
-    if zeros_cooridnates.ndim == 2:
-        for i in range(np.shape(zeros_cooridnates)[0]):
-            every_coordinates = delete_from_array(every_coordinates, zeros_cooridnates[i])
-    elif zeros_cooridnates.ndim == 1:
-        every_coordinates = delete_from_array(every_coordinates, zeros_cooridnates)
+    # delete irreverent zeros
+    if zeros_coordinates.ndim == 2:
+        for i in range(np.shape(zeros_coordinates)[0]):
+            every_coordinates = delete_from_array(every_coordinates, zeros_coordinates[i])
+    elif zeros_coordinates.ndim == 1:
+        every_coordinates = delete_from_array(every_coordinates, zeros_coordinates)
 
+    # Creating GLSZM matrix
     while np.any(every_coordinates):
         zone_size, excluded = find_positions(matrix, every_coordinates[0][0], every_coordinates[0][1])
         output_matrix[matrix[every_coordinates[0][0], every_coordinates[0][1]], zone_size] = output_matrix[matrix[
             every_coordinates[0][0], every_coordinates[0][1]], zone_size] + 1
 
+    # deleting coordinates already checked
         if excluded.ndim == 2:
             for i in range(np.shape(excluded)[0]):
                 every_coordinates = delete_from_array(every_coordinates, excluded[i])
-
         elif excluded.ndim == 1:
             every_coordinates = delete_from_array(every_coordinates, excluded)
 
-    return aftercut(output_matrix)
+    # GLSZM matrix
+    return delete_0_column_row(output_matrix)
 
 
-def find_zeros(matrix, some_array):
+def find_zeros(matrix, my_coordinates_array):
+    """
+    Method to find zero values within a matrix
 
+    Parameters:
+    --------------
+
+    :param matrix: initial matrix with gray level values
+    :param my_coordinates_array: array of coordinates
+    :return: array of zeros coordinates
+    """
+    # init variable
     zeros_coordinates = np.array([0, 0])
-    for i in range(np.shape(some_array)[0]):
-        if matrix[some_array[i][0], some_array[i][1]] == 0:
-            zeros_coordinates = np.vstack([zeros_coordinates, some_array[i]])
+
+    # look for 0 and add their coordinates to array
+    for i in range(np.shape(my_coordinates_array)[0]):
+        if matrix[my_coordinates_array[i][0], my_coordinates_array[i][1]] == 0:
+            zeros_coordinates = np.vstack([zeros_coordinates, my_coordinates_array[i]])
 
     zeros_coordinates = np.delete(zeros_coordinates, 0, 0)
 
@@ -294,27 +352,56 @@ def find_zeros(matrix, some_array):
 
 
 def get_voxels_number(matrix):
+    """
+    Method used for feature - zone_percentage
+
+    Parameters:
+    -----------
+
+    :param matrix: gray level array
+    :return: volume of gray level array
+    """
+    # init
     shape = np.shape(matrix)
-    number = 0
+    volume = 0
 
+    # if array is 2 Dimensional
     if matrix.ndim == 2:
-        number = shape[0] * shape[1]
-    if matrix.ndim == 3:
-        number = shape[0] * shape[1] * shape[2]
+        volume = shape[0] * shape[1]
 
-    return number
+    # if array is 3 Dimensional
+    if matrix.ndim == 3:
+        volume = shape[0] * shape[1] * shape[2]
+
+    return volume
 
 
 def delete_unused_columns(matrix):
+    """
+    Deletes columns filed with 0.
+    Nessesery because the max zone size is hardcoded
+
+    Parameters:
+    --------------
+
+    :param matrix: GLSZM matrix
+    :return: GLSZM matrix without 0-filled columns
+    """
+
     minimal = 0
+    # looping backwards from last column to first
     for i in range(np.shape(matrix)[1] - 1, 0, -1):
+        # if column has no-zero value it stops and breaks loop
         if np.any(matrix[:, i]):
             minimal = i
             break
 
+    # if matrix has any no-zero columns
+    # create new matrix of given size
     if minimal != 0:
         new_matrix = np.zeros([np.shape(matrix)[0], minimal + 1])
 
+    # rewrite the matrix
         for i in range(np.shape(matrix)[0]):
             for j in range(minimal + 1):
                 new_matrix[i, j] = matrix[i, j]
