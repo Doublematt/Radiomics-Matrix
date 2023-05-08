@@ -406,4 +406,11 @@ def delete_unused_columns(matrix):
             for j in range(minimal + 1):
                 new_matrix[i, j] = matrix[i, j]
 
+    # case for 1-column matrix
+    if minimal == 0:
+        new_matrix = np.zeros([np.shape(matrix)[0], 1])
+
+        for i in range(np.shape(matrix)[0]):
+            new_matrix[i, 0] = matrix[i, 0]
+
     return new_matrix
